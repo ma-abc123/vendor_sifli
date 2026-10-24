@@ -10,6 +10,7 @@
 #include <string.h>
 
 #include "mem_map.h"
+#include "sf32lb52_bt_adapter.h"
 
 #if (!defined(SF32LB52X_REV_B)) && !defined(LCPU_RUN_ROM_ONLY)
 #  define g_lcpu_bin g_lcpu_bin_legacy
@@ -234,6 +235,13 @@ uint8_t lcpu_power_on(void)
 
   HAL_LPAON_ConfigStartAddr((uint32_t *)HCPU_LCPU_CODE_START_ADDR);
   lcpu_ble_patch_install();
+
+  if (sf32lb52_bt_prepare_lcpu_boot() < 0)
+    {
+      HAL_HPAON_CANCEL_LP_ACTIVE_REQUEST();
+      return 1;
+    }
+
   HAL_RCC_ReleaseLCPU();
   HAL_HPAON_CANCEL_LP_ACTIVE_REQUEST();
 #ifdef USING_SEC_ENV
